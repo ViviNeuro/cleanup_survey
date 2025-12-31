@@ -1,268 +1,3 @@
-
-# import streamlit as st
-# from datetime import datetime
-
-# # -------------------
-# # Page config
-# # -------------------
-# st.set_page_config(
-#     page_title="Trash Management Survey",
-#     page_icon="🗑️",
-#     layout="centered",
-# )
-
-# # -------------------
-# # Global CSS: reduce spacing between markdown labels and widgets
-# # -------------------
-# st.markdown(
-#     """
-#     <style>
-#       /* Reduce bottom margin after markdown blocks (labels) */
-#       div[data-testid="stMarkdown"] { margin-bottom: 0.2rem; }
-
-#       /* Reduce top margin before widgets (helps "label -> widget" closeness) */
-#       div[data-testid="stVerticalBlock"] > div:has(> div[data-testid^="stWidget"]) {
-#         margin-top: -0.2rem;
-#       }
-#     </style>
-#     """,
-#     unsafe_allow_html=True
-# )
-
-# st.title("Trash Management Survey")
-
-# # -------------------
-# # Helpers
-# # -------------------
-# def float_input(label: str, key: str, step: float = 0.1):
-#     """Decimal number input (e.g., 8.5, 0.6)."""
-#     return st.number_input(
-#         label,
-#         min_value=0.0,
-#         step=step,
-#         format="%.1f",
-#         key=key,
-#     )
-
-# def build_multiselect_with_other(options: list[str], other_label: str, key_prefix: str):
-#     """
-#     Returns:
-#       selected: list[str] (includes other_label if chosen)
-#       other_value: str (free text, stripped)
-#     """
-#     selected = st.multiselect(
-#         label="",  # label handled by markdown above
-#         options=options + [other_label],
-#         key=f"{key_prefix}_selected",
-#     )
-
-#     other_value = ""
-#     if other_label in selected:
-#         other_value = st.text_input(
-#             "Other (please specify):",
-#             key=f"{key_prefix}_other_text",
-#         ).strip()
-
-#     return selected, other_value
-
-# def normalize_selected(selected: list[str], other_label: str, other_value: str):
-#     """
-#     Replace other_label with other_value (if provided), otherwise drop it.
-#     Returns a clean list of item names.
-#     """
-#     final_items = []
-#     for item in selected:
-#         if item == other_label:
-#             if other_value:
-#                 final_items.append(other_value)
-#             else:
-#                 st.warning(f"You selected '{other_label}' but didn’t specify a name.")
-#         else:
-#             final_items.append(item)
-#     return final_items
-
-# def collect_value_per_item(items: list[str], what_label: str, key_prefix: str):
-#     """
-#     For each item in items, ask for a decimal input.
-#     Returns dict: {item: value}
-#     """
-#     values = {}
-#     for item in items:
-#         values[item] = float_input(
-#             f"{what_label} for '{item}':",
-#             key=f"{key_prefix}_{what_label.lower().replace(' ', '_')}_{item}",
-#         )
-#     return values
-
-# # -------------------
-# # 1) Homestay
-# # -------------------
-# st.subheader("1) Homestay")
-
-# homestays = ["Yenbuba", "Bongkso", "Mongkor", "Paparissa", "Kri"]
-# OTHER_HOME = "Other (Free text)"
-
-# st.markdown("#### Select your homestay(s)")
-# selected_homestays_raw, other_homestay = build_multiselect_with_other(
-#     options=homestays,
-#     other_label=OTHER_HOME,
-#     key_prefix="homestay",
-# )
-
-# selected_homestays = normalize_selected(
-#     selected=selected_homestays_raw,
-#     other_label=OTHER_HOME,
-#     other_value=other_homestay,
-# )
-
-# # NEW: Bags per homestay (before kg)
-# if selected_homestays:
-#     st.markdown("#### How many bags per homestay?")
-#     homestay_bags = collect_value_per_item(
-#         items=selected_homestays,
-#         what_label="Bags",
-#         key_prefix="homestay",
-#     )
-# else:
-#     homestay_bags = {}
-
-# # Kg per homestay
-# if selected_homestays:
-#     st.markdown("#### How many kg per homestay?")
-#     homestay_kg = collect_value_per_item(
-#         items=selected_homestays,
-#         what_label="Kg",
-#         key_prefix="homestay",
-#     )
-# else:
-#     homestay_kg = {}
-
-# st.divider()
-
-# # -------------------
-# # 2) Trash types
-# # -------------------
-# st.subheader("2) Trash types")
-
-# trash_types = [
-#     "sachets",
-#     "ropes",
-#     "styrofoam",
-#     "pop mie",
-#     "soft plastics",
-#     "medium plastics nr",
-#     "medium plastics r",
-#     "hard plastics",
-#     "clothing",
-#     "metal and electronics",
-#     "aqua cups",
-#     "carton and paper",
-#     "plastic bottles",
-#     "sandals",
-#     "rice bags",
-# ]
-
-# st.markdown("#### Select your trash type(s)")
-# selected_trash = st.multiselect(
-#     label="",
-#     options=trash_types,
-#     key="trash_selected",
-# )
-
-# if selected_trash:
-#     st.markdown("#### How many kg per trash type?")
-#     trash_kg = collect_value_per_item(
-#         items=selected_trash,
-#         what_label="Kg",
-#         key_prefix="trash",
-#     )
-# else:
-#     trash_kg = {}
-
-# st.divider()
-
-# # -------------------
-# # 3) End-uses
-# # -------------------
-# st.subheader("3) End-use(s)")
-
-# end_uses = ["recycled", "disposed", "reused"]
-
-# st.markdown("#### Select end-use(s)")
-# selected_end_uses = st.multiselect(
-#     label="",
-#     options=end_uses,
-#     key="end_uses_selected",
-# )
-
-# st.divider()
-
-# # -------------------
-# # 4) Cleanup locations
-# # -------------------
-# st.subheader("4) Cleanup location(s)")
-
-# locations = ["Yenbeser", "Mioskun", "Merpati", "Keruwo", "Kri", "Yenbuba", "Koi"]
-# OTHER_LOC = "Other (Free text)"
-
-# st.markdown("#### Select cleanup location(s)")
-# selected_locations_raw, other_location = build_multiselect_with_other(
-#     options=locations,
-#     other_label=OTHER_LOC,
-#     key_prefix="location",
-# )
-
-# final_locations = normalize_selected(
-#     selected=selected_locations_raw,
-#     other_label=OTHER_LOC,
-#     other_value=other_location,
-# )
-
-# st.divider()
-
-# # -------------------
-# # Totals
-# # -------------------
-# st.subheader("Totals")
-
-# total_kg_homestay = round(sum(homestay_kg.values()), 1) if homestay_kg else 0.0
-# total_kg_trash = round(sum(trash_kg.values()), 1) if trash_kg else 0.0
-
-# st.markdown(f"#### Total kg (by homestay): **{total_kg_homestay:.1f}**")
-# st.markdown(f"#### Total kg (by trash type): **{total_kg_trash:.1f}**")
-
-# if homestay_kg and trash_kg and abs(total_kg_homestay - total_kg_trash) > 0.2:
-#     st.info(
-#         "Note: totals by homestay and by trash type don’t match exactly. "
-#         "That can happen—just double-check if it seems off."
-#     )
-
-# st.divider()
-
-# # -------------------
-# # Submit
-# # -------------------
-# if st.button("Submit survey ✅"):
-#     payload = {
-#         "submitted_at": datetime.utcnow().isoformat(),
-#         "homestays": selected_homestays,
-#         "homestay_bags": homestay_bags,            # dict
-#         "homestay_kg": homestay_kg,                # dict
-#         "trash_types": selected_trash,
-#         "trash_kg": trash_kg,                      # dict
-#         "end_uses": selected_end_uses,             # list
-#         "cleanup_locations": final_locations,       # list
-#         "total_kg_homestay": total_kg_homestay,
-#         "total_kg_trash": total_kg_trash,
-#     }
-
-#     st.success("Survey submitted!")
-#     st.write("### Summary (what would be saved)")
-#     st.json(payload)
-
-
-
-
 import streamlit as st
 from datetime import datetime
 
@@ -316,12 +51,25 @@ def multiselect_with_other(label_md: str, options: list[str], other_label: str, 
     return selected, other_value
 
 def number_input_decimal(label_md: str, key: str):
+    """For kg (floats like 8.5, 0.6)"""
     md_label(label_md)
     return st.number_input(
         label="",
         min_value=0.0,
         step=0.1,
         format="%.1f",
+        key=key,
+        label_visibility="collapsed",
+    )
+
+def number_input_integer(label_md: str, key: str):
+    """For bags (integers only)"""
+    md_label(label_md)
+    return st.number_input(
+        label="",
+        min_value=0,
+        step=1,
+        format="%d",
         key=key,
         label_visibility="collapsed",
     )
@@ -367,7 +115,7 @@ if selected_homestays:
     st.markdown("##### Homestay details")
 
     for h in selected_homestays:
-        homestay_bags[h] = number_input_decimal(
+        homestay_bags[h] = number_input_integer(
             f"How many bags for '{h}'?",
             key=f"bags_{h}",
         )
@@ -465,7 +213,7 @@ if selected_locations:
     st.markdown("#### Cleanup location details")
 
     for loc in selected_locations:
-        location_bags[loc] = number_input_decimal(
+        location_bags[loc] = number_input_integer(
             f"How many bags from '{loc}'?",
             key=f"location_bags_{loc}",
         )
@@ -487,14 +235,14 @@ st.subheader("Totals")
 
 total_kg_homestay = round(sum(homestay_kg.values()), 1)
 total_kg_trash = round(sum(v["kg"] for v in trash_details.values()), 1)
-total_bags_homestay = round(sum(homestay_bags.values()), 1)
-total_bags_location = round(sum(location_bags.values()), 1)
+total_bags_homestay = sum(homestay_bags.values())
+total_bags_location = sum(location_bags.values())
 total_kg_location = round(sum(location_kg.values()), 1)
 
-st.write(f"**Total bags (by homestay):** {total_bags_homestay:.1f}")
+st.write(f"**Total bags (by homestay):** {total_bags_homestay}")
 st.write(f"**Total kg (by homestay):** {total_kg_homestay:.1f}")
 st.write(f"**Total kg (by trash type):** {total_kg_trash:.1f}")
-st.write(f"**Total bags (by cleanup location):** {total_bags_location:.1f}")
+st.write(f"**Total bags (by cleanup location):** {total_bags_location}")
 st.write(f"**Total kg (by cleanup location):** {total_kg_location:.1f}")
 
 st.divider()
